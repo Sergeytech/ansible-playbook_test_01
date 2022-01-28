@@ -1,0 +1,65 @@
+#################
+# LEMP PLAYBOOK #
+#################
+---
+- hosts: "all"
+  become: true
+  tasks:
+  
+# Installing Nginx
+  
+  - name: "Install nginx via apt"
+    ansible.builtin.apt:
+      name: "nginx"
+      state: "latest"
+      update_cache: true
+      
+  - name: "Delete /var/www/html folder"
+    ansible.builtin.file:
+      path: "/var/www/html"
+      state: "absent"
+
+  - name: "Copy our landing to /var/www/html folder"
+    ansible.builtin.copy:
+      src: "www_files/html"
+      dest: "/var/www/"
+      owner: "vagrant"
+      group: "vagrant"
+      mode: "0644"
+
+# MYSQL
+  - name: "Install mysql via apt"
+    ansible.builtin.apt:
+      name: "mysql-server"
+      state: "latest"
+      update_cache: true
+
+  - name: "Install pymysql via apt"
+    ansible.builtin.apt:
+      name: "python3-pymysql" # необходим для работы модулей mysql
+      state: "latest"
+      update_cache: true
+
+  - name: "Set up root user"
+    community.mysql.mysql_user:
+      name: "root"
+      password: "password"
+      login_user: "root"
+      login_password: "password"
+      check_implicit_admin: true
+      login_unix_socket: "/var/run/mysqld/mysqld.sock"
+
+  - name: "Remove anonymous users"
+    community.mysql.mysql_user:
+      name: "" # анонимные пользователи не имеют имени
+      state: "absent" # как и с модулем file - удалить
+      login_user: "root"
+      login_password: "password"
+
+  - name: "Remove test database"
+    community.mysql.mysql_db: # модуль для управления базами данных
+      name: "test" # тут это имя базы
+      state: "absent" # как и с модулем file - удалить
+      login_user: "root"
+      login_password: "password"
+
