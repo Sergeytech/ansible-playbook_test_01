@@ -1,6 +1,5 @@
-#################
 # LEMP PLAYBOOK #
-#################
+
 ---
 - hosts: "all"
   become: true
